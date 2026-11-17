@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ course.name }} - Exam Result</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Online Course</a>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto"></ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <span class="navbar-text mr-3">{{ user.first_name }} {{ user.last_name }}</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>{{ course.name }}</h2>
+
+    {% if grade > 80 %}
+    <div class="alert alert-success mt-3" role="alert">
+        <h4 class="alert-heading">Congratulations, {{ user.first_name }}!</h4>
+        <p>You have passed the exam and completed the course with score {{ grade }}/100</p>
+    </div>
+    {% else %}
+    <div class="alert alert-danger mt-3" role="alert">
+        <h4 class="alert-heading">Failed</h4>
+        <p>You have failed the exam with score {{ grade }}/100</p>
+        <a href="{% url 'onlinecourse:course_details' course.id %}" class="btn btn-danger">Retake Exam</a>
+    </div>
+    {% endif %}
+
+    <h4 class="mt-4">Exam results</h4>
+    {% for lesson in course.lesson_set.all %}
+        {% for question in lesson.question_set.all %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>{{ question.question_text }}</strong>
+                <span class="badge badge-info float-right">{{ question.grade }} points</span>
+            </div>
+            <div class="card-body">
+                {% for choice in question.choice_set.all %}
+                    {% if choice.id in selected_ids %}
+                        {% if choice.is_correct %}
+                        <div class="alert alert-success py-2 mb-2">
+                            &#10004; {{ choice.choice_text }} (correct answer, selected)
+                        </div>
+                        {% else %}
+                        <div class="alert alert-danger py-2 mb-2">
+                            &#10008; {{ choice.choice_text }} (wrong answer, selected)
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        {% if choice.is_correct %}
+                        <div class="alert alert-warning py-2 mb-2">
+                            &#9679; {{ choice.choice_text }} (correct answer, not selected)
+                        </div>
+                        {% else %}
+                        <div class="alert alert-secondary py-2 mb-2">
+                            {{ choice.choice_text }}
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+</body>
+</html>
